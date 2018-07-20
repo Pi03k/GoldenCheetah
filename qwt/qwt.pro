@@ -10,7 +10,7 @@
 include( qwtconfig.pri )
 
 TEMPLATE = subdirs
-CONFIG   += ordered
+CONFIG   += ordered debug
 
 SUBDIRS = src 
  

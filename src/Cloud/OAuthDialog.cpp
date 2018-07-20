@@ -16,13 +16,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Secrets.h"
 
-#include "OAuthDialog.h"
 #include "Athlete.h"
-#include "Context.h"
-#include "Settings.h"
+#include "CloudService.h"
 #include "Colors.h"
+#include "Context.h"
+#include "OAuthDialog.h"
+#include "Pages.h"
+#include "Secrets.h"
 #include "TimeUtils.h"
 
 #if QT_VERSION > 0x050000
@@ -35,6 +36,7 @@
 OAuthDialog::OAuthDialog(Context *context, OAuthSite site, CloudService *service, QString baseURL, QString clientsecret) :
     context(context), site(site), service(service), baseURL(baseURL), clientsecret(clientsecret)
 {
+	qDebug() << __PRETTY_FUNCTION__;
 
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle(tr("OAuth"));
@@ -103,11 +105,18 @@ OAuthDialog::OAuthDialog(Context *context, OAuthSite site, CloudService *service
     if (site == STRAVA) {
 
         urlstr = QString("https://www.strava.com/oauth/authorize?");
-        urlstr.append("client_id=").append(GC_STRAVA_CLIENT_ID).append("&");
+		// TODO pi03k: retrieve client id from service settings
+		QString clientId = service->getSetting(GC_CLIENT_ID).toString();
+		//auto clientSecret = service->getSetting(CLIENT_SECRET);
+		// TODO pi03k: retrieve client secret from service settings
+		qDebug() << "Client ID: " << clientId;
+		//qDebug() << "Client secret: " << clientSecret;
+        urlstr.append("client_id=").append(clientId).append("&");
         urlstr.append("scope=view_private,write&");
         urlstr.append("redirect_uri=http://www.goldencheetah.org/&");
         urlstr.append("response_type=code&");
         urlstr.append("approval_prompt=force");
+		qDebug() << "STRAVA URL: " << urlstr;
 
     } else if (site == DROPBOX) {
 
@@ -284,12 +293,13 @@ OAuthDialog::urlChanged(const QUrl &url)
                 params.addQueryItem("grant_type", "authorization_code");
 
             } else if (site == STRAVA) {
-
+				auto clientId = service->getSetting(GC_CLIENT_ID).toString();
+				auto clientSecret = service->getSetting(GC_CLIENT_SECRET).toString();
                 urlstr = QString("https://www.strava.com/oauth/token?");
-                params.addQueryItem("client_id", GC_STRAVA_CLIENT_ID);
-#ifdef GC_STRAVA_CLIENT_SECRET
-                params.addQueryItem("client_secret", GC_STRAVA_CLIENT_SECRET);
-#endif
+				// TODO pi03k: retrieve client id from service settings
+                params.addQueryItem("client_id", clientId);
+				// TODO pi03k: retrieve client secret from service settings
+                params.addQueryItem("client_secret", clientSecret);
 
             }  else if (site == CYCLING_ANALYTICS) {
 
@@ -489,6 +499,7 @@ OAuthDialog::networkRequestFinished(QNetworkReply *reply)
         }
 #else
         refresh_token = RawJsonStringGrab(payload, "refresh_token");
+		// TODO piotr.mucko: What request is this?
         access_token = RawJsonStringGrab(payload, "access_token");
 #endif
 

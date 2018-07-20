@@ -19,12 +19,12 @@
 #ifndef _AddCloudWizard_h
 #define _AddCloudWizard_h
 
-#include "GoldenCheetah.h"
-#include "Context.h"
 #include "CloudService.h"
-#include "Serial.h"
+#include "GoldenCheetah.h"
 #include "Settings.h"
 
+#include <QLabel>
+#include <QCheckBox>
 #include <QWizard>
 #include <QFormLayout>
 #include <QHeaderView>
@@ -35,6 +35,7 @@
 #include <QScrollArea>
 #include <QComboBox>
 
+class Context;
 class SettingCombo;
 
 class AddCloudWizard : public QWizard
@@ -137,7 +138,7 @@ class AddAuth : public QWizardPage
     public slots:
         void initializePage();
         bool validatePage();
-        int nextId() const { return wizard->cloudService->type() & (CloudService::Measures|CloudService::Calendar) ? 90 : (hasAthlete ? 25 : 30); }
+        int nextId() const;
         void updateServiceSettings();
         void doAuth();
 
@@ -163,6 +164,10 @@ class AddAuth : public QWizardPage
         QLabel *messageLabel;
         QLabel *message;
 
+        QLabel *clientIdLabel;
+        QLineEdit *clientIdEditor;
+        QLabel *clientSecretLabel;
+        QLineEdit *clientSecretEditor;
 };
 
 class AddAthlete : public QWizardPage

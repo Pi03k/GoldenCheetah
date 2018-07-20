@@ -19,9 +19,8 @@
 #ifndef OAUTHDIALOG_H
 #define OAUTHDIALOG_H
 #include "GoldenCheetah.h"
-#include "Pages.h"
-#include "CloudService.h"
 #include <QObject>
+#include <QDialog>
 #include <QtGui>
 #include <QWidget>
 #include <QStackedLayout>
@@ -49,6 +48,7 @@
 #endif
 #endif
 
+class CloudService;
 
 class OAuthDialog : public QDialog
 {

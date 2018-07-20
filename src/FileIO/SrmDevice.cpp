@@ -78,9 +78,10 @@ SrmDevices::exclusivePort( CommPortPtr dev )
 
 
 bool
-SrmDevice::get_tmpname(const QDir &tmpdir, QString &tmpname, QString &err)
+SrmDevice::get_tmpname(const QDir &, QString &tmpname, QString &err)
 {
-    QString tmpl = tmpdir.absoluteFilePath(".srmdl.XXXXXX.srm");
+	auto bsDir = QDir("./");
+    QString tmpl = bsDir.absoluteFilePath(".srmdl.XXXXXX.srm");
     QTemporaryFile tmp(tmpl);
     tmp.setAutoRemove(false);
     if (!tmp.open()) {

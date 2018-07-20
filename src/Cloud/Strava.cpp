@@ -30,7 +30,7 @@
 #include <QJsonValue>
 
 #ifndef STRAVA_DEBUG
-#define STRAVA_DEBUG false
+#define STRAVA_DEBUG true
 #endif
 #ifdef Q_CC_MSVC
 #define printd(fmt, ...) do {                                                \
@@ -51,25 +51,18 @@
     } while(0)
 #endif
 
-Strava::Strava(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
+Strava::Strava(Context *context) : CloudService(context), context(context), root_(NULL), nam(new QNetworkAccessManager)
+{
+	connect(nam.get(), SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
 
     uploadCompression = gzip; // gzip
     downloadCompression = none;
-    filetype = uploadType::TCX;
+    filetype = uploadType::TCX; //TODO piotr.mucko: Make this configurable (FIT|TCX).
     useMetric = true; // distance and duration metadata
 
     // config
     settings.insert(OAuthToken, GC_STRAVA_TOKEN);
     settings.insert(Metadata1, QString("%1::Activity Name").arg(GC_STRAVA_ACTIVITY_NAME));
-}
-
-Strava::~Strava() {
-    if (context) delete nam;
 }
 
 QImage Strava::logo() const

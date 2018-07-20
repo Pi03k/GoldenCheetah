@@ -37,7 +37,7 @@ class Strava : public CloudService {
 
         Strava(Context *context);
         CloudService *clone(Context *context) { return new Strava(context); }
-        ~Strava();
+        ~Strava() = default;
 
         // open/connect and close/disconnect
         bool open(QStringList &errors);
@@ -66,7 +66,7 @@ class Strava : public CloudService {
 
     private:
         Context *context;
-        QNetworkAccessManager *nam;
+        std::unique_ptr<QNetworkAccessManager> nam;
         QNetworkReply *reply;
         CloudServiceEntry *root_;
 

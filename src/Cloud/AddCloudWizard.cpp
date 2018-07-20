@@ -25,6 +25,7 @@
 #include "Colors.h"
 #include "CloudService.h"
 #include "OAuthDialog.h"
+#include "Serial.h"
 
 #include <QMessageBox>
 #include <QRegExp>
@@ -277,6 +278,10 @@ AddAuth::AddAuth(AddCloudWizard *parent) : QWizardPage(parent), wizard(parent)
     token->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     message = new QLabel(this);
     message->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	clientIdEditor = new QLineEdit(this);
+    clientIdEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	clientSecretEditor = new QLineEdit(this);
+    clientSecretEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     // labels
     comboLabel = new QLabel("");
@@ -287,6 +292,8 @@ AddAuth::AddAuth(AddCloudWizard *parent) : QWizardPage(parent), wizard(parent)
     authLabel = new QLabel(tr("Authorise"));
     tokenLabel = new QLabel(tr("Token"));
     messageLabel = new QLabel(tr("Message"));
+	clientIdLabel = new QLabel(tr("Client ID"));
+	clientSecretLabel = new QLabel(tr("Client Secret"));
 
     layout->addRow(comboLabel, combo);
     layout->addRow(urlLabel, url);
@@ -296,6 +303,8 @@ AddAuth::AddAuth(AddCloudWizard *parent) : QWizardPage(parent), wizard(parent)
     layout->addRow(authLabel, auth);
     layout->addRow(messageLabel, message);
     layout->addRow(tokenLabel, token);
+    layout->addRow(clientIdLabel, clientIdEditor);
+    layout->addRow(clientSecretLabel, clientSecretEditor);
 
     connect(auth, SIGNAL(clicked(bool)), this, SLOT(doAuth()));
 
@@ -316,9 +325,9 @@ AddAuth::doAuth()
     updateServiceSettings();
 
     if (wizard->cloudService->capabilities() & CloudService::OAuth) {
-        OAuthDialog *oauthDialog = new OAuthDialog(wizard->context, OAuthDialog::NONE, wizard->cloudService);
+        std::unique_ptr<OAuthDialog> oauthDialog { new OAuthDialog(wizard->context, OAuthDialog::NONE, wizard->cloudService) };
         if (oauthDialog->sslLibMissing()) {
-            delete oauthDialog;
+            return;
         } else {
             oauthDialog->setWindowModality(Qt::ApplicationModal);
             oauthDialog->exec();
@@ -397,6 +406,11 @@ AddAuth::initializePage()
         token->show(); tokenLabel->show();
         token->setText(wizard->cloudService->getSetting(cname, "").toString());
     }
+    /*if ((cname=wizard->cloudService->settings.value(CloudService::CloudServiceSetting::OAuthToken, "")) != "") {
+        auth->show(); authLabel->show();
+        token->show(); tokenLabel->show();
+        token->setText(wizard->cloudService->getSetting(cname, "").toString());
+    }*/
 
 }
 
@@ -432,6 +446,11 @@ AddAuth::updateServiceSettings()
     if ((cname=wizard->cloudService->settings.value(CloudService::CloudServiceSetting::OAuthToken, "")) != "") {
         wizard->cloudService->setSetting(cname, token->text());
     }
+}
+
+int AddAuth::nextId() const
+{
+	return wizard->cloudService->type() & (CloudService::Measures|CloudService::Calendar) ? 90 : (hasAthlete ? 25 : 30);
 }
 
 //Select Athlete, if needed

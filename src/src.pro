@@ -27,8 +27,9 @@ TEMPLATE = app
 TARGET = GoldenCheetah
 
 !isEmpty(APP_NAME) { TARGET = $${APP_NAME} }
-CONFIG(debug, debug|release) { QMAKE_CXXFLAGS += -DGC_DEBUG }
+CONFIG(debug, debug|release) { DEFINES += GC_DEBUG DEBUG STRAVA_DEBUG }
 
+QMAKE_CXXFLAGS += -O0 -ggdb3 -std=c++11 -Wextra -Wall
 
 ###======================================================
 ### QT MODULES [we officially support QT4.8.6+ or QT5.8+]

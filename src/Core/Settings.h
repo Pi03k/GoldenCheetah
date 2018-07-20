@@ -356,6 +356,8 @@
 //Strava
 #define GC_STRAVA_TOKEN                 "<athlete-private>strava_token"
 #define GC_STRAVA_ACTIVITY_NAME         "<athlete-private>strava_metaname"
+#define GC_CLIENT_ID                    "<athlete-private>client_id"
+#define GC_CLIENT_SECRET                "<athlete-private>client_secret"
 //Cycling Analytics
 #define GC_CYCLINGANALYTICS_TOKEN       "<athlete-private>cyclinganalytics_token"
 //Today's Plan
