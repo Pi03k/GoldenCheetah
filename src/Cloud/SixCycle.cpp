@@ -49,13 +49,8 @@
     } while(0)
 #endif
 
-SixCycle::SixCycle(Context *context) : CloudService(context), context(context), root_(NULL)
+SixCycle::SixCycle(Context *context) : CloudService(context)
 {
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
     // how is data uploaded and downloaded?
     uploadCompression = gzip;
     downloadCompression = none;
@@ -70,16 +65,6 @@ SixCycle::SixCycle(Context *context) : CloudService(context), context(context), 
     settings.insert(Password, GC_SIXCYCLE_PASS);
     settings.insert(URL, GC_SIXCYCLE_URL);
     settings.insert(DefaultURL, "https://live.sixcycle.com");
-}
-
-SixCycle::~SixCycle() {
-    if (context) delete nam;
-}
-
-void
-SixCycle::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 // open by connecting and getting a basic list of folders available
@@ -108,7 +93,7 @@ SixCycle::open(QStringList &errors)
 
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader,  "application/x-www-form-urlencoded");
-    QNetworkReply *reply = nam->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    QNetworkReply *reply = nam_->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 
     // blocking request - wait for response, timeout after 5 seconds
     QEventLoop loop;
@@ -236,7 +221,7 @@ SixCycle::readdir(QString path, QStringList &errors, QDateTime from, QDateTime t
     printd("user: %s\n", session_user.toStdString().c_str());
 
     // post the request
-    reply = nam->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    reply = nam_->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 
     // blocking request, with a 10 seconds timeout (might have a lot of data)
     QEventLoop loop;
@@ -334,7 +319,7 @@ SixCycle::readFile(QByteArray *data, QString remotename, QString remoteid)
     //request.setRawHeader("Accept-Encoding", "gzip, deflate");
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -424,7 +409,7 @@ SixCycle::writeFile(QByteArray &data, QString remotename, RideFile *ride)
     multiPart->append(userPart);
 
     // post the file
-    reply = nam->post(request, multiPart);
+    reply = nam_->post(request, multiPart);
 
     multiPart->setParent(reply);
 

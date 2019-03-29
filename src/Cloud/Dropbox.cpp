@@ -23,18 +23,10 @@
 #include <QJsonObject>
 #include <QByteArray>
 
-Dropbox::Dropbox(Context *context) : CloudService(context), context(context), root_(NULL) {
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-    }
-
+Dropbox::Dropbox(Context *context) : CloudService(context) {
     // config
     settings.insert(OAuthToken, GC_DROPBOX_TOKEN);
     settings.insert(Folder, GC_DROPBOX_FOLDER);
-}
-
-Dropbox::~Dropbox() {
-    if (context) {delete nam;}
 }
 
 // open by connecting and getting a basic list of folders available
@@ -104,7 +96,7 @@ bool Dropbox::createFolder(QString path)
 
     QByteArray data;
     data.append(QString("{ \"path\": \"%1\", \"autorename\": false }").arg(path));
-    QNetworkReply *reply = nam->post(request, data);
+    QNetworkReply *reply = nam_->post(request, data);
 
     // blocking request
     QEventLoop loop;
@@ -152,7 +144,7 @@ Dropbox::readdir(QString path, QStringList &errors)
             request.setUrl(QUrl("https://api.dropboxapi.com/2/files/list_folder/continue"));
             data.append(QString("{ \"cursor\": \"%1\" }").arg(cursor));
         }
-        QNetworkReply *reply = nam->post(request, data);
+        QNetworkReply *reply = nam_->post(request, data);
 
         // blocking request
         QEventLoop loop;
@@ -229,7 +221,7 @@ Dropbox::readFile(QByteArray *data, QString remotename, QString)
     request.setRawHeader("Dropbox-API-Arg", (QString("{ \"path\": \"%1/%2\" }").arg(path).arg(remotename)).toLatin1());
     // put the file
     QByteArray emptyPostData = "";
-    QNetworkReply *reply = nam->post(request, emptyPostData);
+    QNetworkReply *reply = nam_->post(request, emptyPostData);
 
     // remember
     mapReply(reply,remotename);
@@ -267,7 +259,7 @@ Dropbox::writeFile(QByteArray &data, QString remotename, RideFile *ride)
     request.setRawHeader("Content-Type", "application/octet-stream");
 
     // put the file
-    QNetworkReply *reply = nam->post(request, data);
+    QNetworkReply *reply = nam_->post(request, data);
 
     // catch finished signal
     connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));

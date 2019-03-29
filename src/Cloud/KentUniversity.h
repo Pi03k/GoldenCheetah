@@ -43,7 +43,6 @@ class KentUniversity : public GoogleDrive {
     public:
         KentUniversity(Context *context);
         CloudService *clone(Context *context) { return new KentUniversity(context); }
-        ~KentUniversity();
 
         virtual QString id() const { return "University of Kent"; }
         virtual QString uiName() const { return tr("University of Kent"); }
@@ -67,8 +66,6 @@ class KentUniversity : public GoogleDrive {
         virtual bool createFolder(QString path);
         void folderSelected(QString path);
 
-        // dirent style api
-        virtual CloudServiceEntry *root() { return root_; }
         // Readdir reads the files from the remote side and updates root_dir_
         // with a local cache. readdir will read ALL files and refresh
         // everything.
@@ -88,12 +85,7 @@ class KentUniversity : public GoogleDrive {
         // sending data
         void writeFileCompleted();
 
-        // dealing with SSL handshake problems
-        void onSslErrors(QNetworkReply*reply, const QList<QSslError> & );
-
     private:
-        struct FileInfo;
-
         void MaybeRefreshCredentials();
 
         // Fetches a JSON document from the given URL.
@@ -112,15 +104,6 @@ class KentUniversity : public GoogleDrive {
         static QString MakeQString(const QString& parent);
         QString GetRootDirId();
 
-        Context *context_;
-        QNetworkAccessManager *nam_;
-        CloudServiceEntry *root_;
-        QString root_directory_id_;
-        QScopedPointer<FileInfo> root_dir_;
-
-        QMap<QNetworkReply*, QByteArray*> buffers_;
-        QMap<QNetworkReply*, QSharedPointer<QBuffer> > patch_buffers_;
-        QMutex mu_;
 };
 
 // SPECIAL UPLOADER dialog to upload a single rideitem but ensure

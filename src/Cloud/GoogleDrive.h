@@ -38,7 +38,6 @@ class GoogleDrive : public CloudService {
     public:
         GoogleDrive(Context *context);
         CloudService *clone(Context *context) { return new GoogleDrive(context); }
-        virtual ~GoogleDrive();
 
         virtual QString id() const { return "Google Drive"; }
         virtual QString uiName() const { return tr("Google Drive"); }
@@ -63,7 +62,6 @@ class GoogleDrive : public CloudService {
         void folderSelected(QString path);
 
         // dirent style api
-        virtual CloudServiceEntry *root() { return root_; }
         // Readdir reads the files from the remote side and updates root_dir_
         // with a local cache. readdir will read ALL files and refresh
         // everything.
@@ -83,12 +81,16 @@ class GoogleDrive : public CloudService {
         // sending data
         void writeFileCompleted();
 
-        // dealing with SSL handshake problems
-        void onSslErrors(QNetworkReply*reply, const QList<QSslError> & );
-
-    private:
+    protected:
         struct FileInfo;
 
+        QString root_directory_id_;
+        QScopedPointer<FileInfo> root_dir_;
+
+        QMap<QNetworkReply*, QByteArray*> buffers_;
+        QMap<QNetworkReply*, QSharedPointer<QBuffer> > patch_buffers_;
+        QMutex mu_;
+    private:
         void MaybeRefreshCredentials();
 
         // Fetches a JSON document from the given URL.
@@ -107,15 +109,21 @@ class GoogleDrive : public CloudService {
         static QString MakeQString(const QString& parent);
         QString GetRootDirId();
 
-        Context *context_;
-        QNetworkAccessManager *nam_;
-        CloudServiceEntry *root_;
-        QString root_directory_id_;
-        QScopedPointer<FileInfo> root_dir_;
-
-        QMap<QNetworkReply*, QByteArray*> buffers_;
-        QMap<QNetworkReply*, QSharedPointer<QBuffer> > patch_buffers_;
-        QMutex mu_;
 };
+
+struct GoogleDrive::FileInfo {
+    QString name;
+    QString id;  // This is the unique identifier.
+    QString parent; // id of the parent.
+    QString download_url;
+
+    QDateTime modified;
+    int size;
+    bool is_dir;
+
+    // This is a map of names => FileInfos for quick searching of children.
+    std::map<QString, QSharedPointer<FileInfo> > children;
+};
+
 
 #endif  // GC_GOOGLE_DRIVE_H

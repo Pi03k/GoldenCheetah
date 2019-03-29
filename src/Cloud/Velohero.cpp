@@ -53,13 +53,8 @@
 
 static const QString VELOHERO_URL( "http://app.velohero.com" );
 
-Velohero::Velohero(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+Velohero::Velohero(Context *context) : CloudService(context)
+{
     uploadCompression = none; // gzip
     filetype = CloudService::uploadType::PWX;
     useMetric = true; // distance and duration metadata
@@ -67,16 +62,6 @@ Velohero::Velohero(Context *context) : CloudService(context), context(context), 
     //config
     settings.insert(Username, GC_VELOHEROUSER);
     settings.insert(Password, GC_VELOHEROPASS);
-}
-
-Velohero::~Velohero() {
-    if (context) delete nam;
-}
-
-void
-Velohero::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -109,12 +94,12 @@ Velohero::open(QStringList &errors)
     request.setRawHeader("Accept-Charset", "utf-8");
 
     QEventLoop loop;
-    reply = nam->get(request);
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    reply_ = nam_->get(request);
+    connect(reply_, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
     VeloHeroSessionParser handler;
-    QXmlInputSource source(reply);
+    QXmlInputSource source(reply_);
 
     QXmlSimpleReader reader;
     reader.setContentHandler(&handler);
@@ -198,13 +183,13 @@ Velohero::writeFile(QByteArray &data, QString remotename, RideFile *ride)
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, body);
+    reply_ = nam_->post(request, body);
 
     // catch finished signal
-    connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
+    connect(reply_, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
 
     // remember
-    mapReply(reply,remotename);
+    mapReply(reply_,remotename);
     return true;
 }
 

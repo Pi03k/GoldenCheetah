@@ -37,7 +37,6 @@ class Strava : public CloudService {
 
         Strava(Context *context);
         CloudService *clone(Context *context) { return new Strava(context); }
-        ~Strava();
 
         // open/connect and close/disconnect
         bool open(QStringList &errors);
@@ -51,8 +50,6 @@ class Strava : public CloudService {
         // read a file
         bool readFile(QByteArray *data, QString remotename, QString remoteid);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors, QDateTime from, QDateTime to);
 
     public slots:
@@ -65,10 +62,7 @@ class Strava : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
 
@@ -77,8 +71,5 @@ class Strava : public CloudService {
         void addSamples(RideFile* ret, QString remoteid);
         void fixLapSwim(RideFile* ret, QJsonArray laps);
         void fixSmartRecording(RideFile* ret);
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

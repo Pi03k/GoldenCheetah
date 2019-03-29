@@ -52,12 +52,7 @@
     } while(0)
 #endif
 
-SportTracks::SportTracks(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
+SportTracks::SportTracks(Context *context) : CloudService(context) {
 
     uploadCompression = none; // gzip
     downloadCompression = none;
@@ -68,16 +63,6 @@ SportTracks::SportTracks(Context *context) : CloudService(context), context(cont
     settings.insert(OAuthToken, GC_SPORTTRACKS_TOKEN);
     settings.insert(Local1, GC_SPORTTRACKS_REFRESH_TOKEN);
     settings.insert(Local2, GC_SPORTTRACKS_LAST_REFRESH);
-}
-
-SportTracks::~SportTracks() {
-    if (context) delete nam;
-}
-
-void
-SportTracks::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 // open by connecting and getting a basic list of folders available
@@ -107,7 +92,7 @@ SportTracks::open(QStringList &errors)
     data += "&grant_type=refresh_token";
 
     // make request
-    QNetworkReply* reply = nam->post(request, data.toLatin1());
+    QNetworkReply* reply = nam_->post(request, data.toLatin1());
 
     // blocking request
     QEventLoop loop;
@@ -147,7 +132,7 @@ SportTracks::open(QStringList &errors)
     setSetting(GC_SPORTTRACKS_LAST_REFRESH, QDateTime::currentDateTime());
 
     // get the factory to save our settings permanently
-    CloudServiceFactory::instance().saveSettings(this, context);
+    CloudServiceFactory::instance().saveSettings(this, context_);
     return true;
 }
 
@@ -195,7 +180,7 @@ SportTracks::readdir(QString path, QStringList &errors, QDateTime, QDateTime)
 
         // make request
         printd("fetch page: %s\n", urlstr.toStdString().c_str());
-        QNetworkReply *reply = nam->get(request);
+        QNetworkReply *reply = nam_->get(request);
 
         // blocking request
         QEventLoop loop;
@@ -283,7 +268,7 @@ SportTracks::readFile(QByteArray *data, QString remotename, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -538,7 +523,7 @@ SportTracks::readFileCompleted()
         // create a response
         JsonFileReader reader;
         returning->clear();
-        returning->append(reader.toByteArray(context, ret, true, true, true, true));
+        returning->append(reader.toByteArray(context_, ret, true, true, true, true));
 
         // temp ride not needed anymore
         delete ret;
@@ -576,7 +561,7 @@ SportTracks::writeFile(QByteArray &data, QString remotename, RideFile *)
     params.addQueryItem("format", "TCX");
     params.addQueryItem("data", data); // I know, this is really how it gets posted !
 
-    QNetworkReply *reply = nam->post(request, params.query(QUrl::FullyEncoded).toUtf8());
+    QNetworkReply *reply = nam_->post(request, params.query(QUrl::FullyEncoded).toUtf8());
 
     // catch finished signal
     connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));

@@ -81,10 +81,8 @@ class CalDAVCloud : public CloudService {
         // we register one of each with the cloud service factory
         CalDAVCloud(Context *context, CalDAV::type variant);
         CloudService *clone(Context *context) { return new CalDAVCloud(context, variant); }
-        ~CalDAVCloud();
 
     private:
-        Context *context;
         CalDAV::type variant;
 
 };

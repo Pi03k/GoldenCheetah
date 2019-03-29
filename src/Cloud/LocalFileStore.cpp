@@ -20,9 +20,9 @@
 #include "Athlete.h"
 #include "Settings.h"
 
-LocalFileStore::LocalFileStore(Context *context) : CloudService(context), context(context) {
-
-    if (context) {
+LocalFileStore::LocalFileStore(Context *context) : CloudService(context)
+{
+    if (context_) {
         // we have a root
         root_ = newCloudServiceEntry();
 
@@ -34,10 +34,6 @@ LocalFileStore::LocalFileStore(Context *context) : CloudService(context), contex
 
     // settings
     settings.insert(Folder, GC_NETWORKFILESTORE_FOLDER);
-}
-
-LocalFileStore::~LocalFileStore() {
-
 }
 
 // open by connecting and getting a basic list of folders available
@@ -73,7 +69,7 @@ LocalFileStore::close()
 QString
 LocalFileStore::home()
 {
-    if (context) return getSetting(GC_NETWORKFILESTORE_FOLDER, "").toString();
+    if (context_) return getSetting(GC_NETWORKFILESTORE_FOLDER, "").toString();
     else return "";
 }
 

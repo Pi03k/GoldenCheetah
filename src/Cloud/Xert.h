@@ -32,7 +32,6 @@ class Xert : public CloudService {
 
         Xert(Context *context);
         CloudService *clone(Context *context) { return new Xert(context); }
-        ~Xert();
 
         QString id() const { return "Xert"; }
         QString uiName() const { return tr("Xert"); }
@@ -53,7 +52,6 @@ class Xert : public CloudService {
         bool writeFile(QByteArray &data, QString remotename, RideFile *ride);
 
         // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors, QDateTime from, QDateTime to);
 
     public slots:
@@ -66,16 +64,10 @@ class Xert : public CloudService {
         void writeFileCompleted();  
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
-        QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
 
     private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
-
         QString getRideName(RideFile *ride);
         QJsonObject readActivityDetail(QString path, bool withSessionData);
 };

@@ -51,7 +51,7 @@
     } while(0)
 #endif
 
-CalDAVCloud::CalDAVCloud(Context *context, CalDAV::type variant) : CloudService(context), context(context), variant(variant) {
+CalDAVCloud::CalDAVCloud(Context *context, CalDAV::type variant) : CloudService(context), variant(variant) {
 
     // config
     if (variant == CalDAV::Google) {
@@ -64,8 +64,6 @@ CalDAVCloud::CalDAVCloud(Context *context, CalDAV::type variant) : CloudService(
         settings.insert(Password, GC_DVPASS);
     }
 }
-
-CalDAVCloud::~CalDAVCloud() {}
 
 QImage CalDAVCloud::logo() const
 {

@@ -50,13 +50,8 @@
     } while(0)
 #endif
 
-CyclingAnalytics::CyclingAnalytics(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+CyclingAnalytics::CyclingAnalytics(Context *context) : CloudService(context)
+{
     uploadCompression = none; // gzip
     downloadCompression = none; // gzip
     filetype = uploadType::FIT;
@@ -64,16 +59,6 @@ CyclingAnalytics::CyclingAnalytics(Context *context) : CloudService(context), co
 
     // config
     settings.insert(OAuthToken, GC_CYCLINGANALYTICS_TOKEN);
-}
-
-CyclingAnalytics::~CyclingAnalytics() {
-    if (context) delete nam;
-}
-
-void
-CyclingAnalytics::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -123,7 +108,7 @@ CyclingAnalytics::readdir(QString path, QStringList &errors, QDateTime, QDateTim
 
     // make request
     printd("fetch list: %s\n", urlstr.toStdString().c_str());
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request, with a 30s timeout
     QEventLoop loop;
@@ -270,7 +255,7 @@ CyclingAnalytics::readFile(QByteArray *data, QString remotename, QString remotei
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -420,7 +405,7 @@ CyclingAnalytics::readFileCompleted()
         // create a response
         JsonFileReader reader;
         returning->clear();
-        returning->append(reader.toByteArray(context, ret, true, true, true, true));
+        returning->append(reader.toByteArray(context_, ret, true, true, true, true));
 
         // temp ride not needed anymore
         delete ret;
@@ -475,7 +460,7 @@ CyclingAnalytics::writeFile(QByteArray &data, QString remotename, RideFile *ride
     multiPart->append(dataTypePart);
     multiPart->append(filePart);
 
-    reply = nam->post(request, multiPart);
+    reply = nam_->post(request, multiPart);
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
 

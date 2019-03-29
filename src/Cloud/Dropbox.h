@@ -31,7 +31,6 @@ class Dropbox : public CloudService {
 
         Dropbox(Context *context);
         CloudService *clone(Context *context) { return new Dropbox(context); }
-        ~Dropbox();
 
         QString id() const { return "Dropbox"; }
         QString uiName() const { return tr("Dropbox"); }
@@ -54,8 +53,6 @@ class Dropbox : public CloudService {
         // create a folder
         bool createFolder(QString path);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors);
 
     public slots:
@@ -68,10 +65,7 @@ class Dropbox : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
 };

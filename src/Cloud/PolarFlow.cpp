@@ -49,12 +49,7 @@
     } while(0)
 #endif
 
-PolarFlow::PolarFlow(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
+PolarFlow::PolarFlow(Context *context) : CloudService(context) {
 
     uploadCompression = gzip; // gzip
     downloadCompression = none;
@@ -63,16 +58,6 @@ PolarFlow::PolarFlow(Context *context) : CloudService(context), context(context)
     // config
     settings.insert(OAuthToken, GC_POLARFLOW_TOKEN);
     settings.insert(Local1, GC_POLARFLOW_USER_ID);
-}
-
-PolarFlow::~PolarFlow() {
-    if (context) delete nam;
-}
-
-void
-PolarFlow::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 // open by connecting and getting a basic list of folders available
@@ -98,7 +83,7 @@ PolarFlow::open(QStringList &errors)
     QNetworkRequest request(url);
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -188,7 +173,7 @@ PolarFlow::readFile(QByteArray *data, QString remotename, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);

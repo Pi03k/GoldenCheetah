@@ -42,7 +42,6 @@ class Velohero : public CloudService {
 
         Velohero(Context *context);
         CloudService *clone(Context *context) { return new Velohero(context); }
-        ~Velohero();
 
         // upload only and authenticates with a user and password
         int capabilities() const { return UserPass | Upload; }
@@ -60,16 +59,10 @@ class Velohero : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
         QString sessionId;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 
 // parse upload response

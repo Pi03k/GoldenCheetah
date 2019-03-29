@@ -30,7 +30,6 @@ class LocalFileStore : public CloudService {
 
         LocalFileStore(Context *context);
         CloudService *clone(Context *context) { return new LocalFileStore(context); }
-        ~LocalFileStore();
 
         QString id() const { return "Local Store"; }
         QString uiName() const { return tr("Local Store"); }
@@ -54,13 +53,6 @@ class LocalFileStore : public CloudService {
         // create a folder
         bool createFolder(QString path);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors);
-
-    private:
-        Context *context;
-        CloudServiceEntry *root_;
-
 };
 #endif

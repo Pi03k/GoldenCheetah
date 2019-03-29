@@ -50,12 +50,7 @@
     } while(0)
 #endif
 
-RideWithGPS::RideWithGPS(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
+RideWithGPS::RideWithGPS(Context *context) : CloudService(context) {
 
     uploadCompression = none; // gzip
     useMetric = true; // distance and duration metadata
@@ -63,16 +58,6 @@ RideWithGPS::RideWithGPS(Context *context) : CloudService(context), context(cont
     // config
     settings.insert(Username, GC_RWGPSUSER);
     settings.insert(Password, GC_RWGPSPASS);
-}
-
-RideWithGPS::~RideWithGPS() {
-    if (context) delete nam;
-}
-
-void
-RideWithGPS::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -162,13 +147,13 @@ RideWithGPS::writeFile(QByteArray &, QString remotename, RideFile *ride)
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, out.toLatin1());
+    reply_ = nam_->post(request, out.toLatin1());
 
     // catch finished signal
-    connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
+    connect(reply_, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
 
     // remember
-    mapReply(reply,remotename);
+    mapReply(reply_,remotename);
     return true;
 }
 

@@ -72,28 +72,9 @@ namespace {
     static const QString kMaxResults = "1000";
 };
 
-struct KentUniversity::FileInfo {
-    QString name;
-    QString id;  // This is the unique identifier.
-    QString parent; // id of the parent.
-    QString download_url;
-
-    QDateTime modified;
-    int size;
-    bool is_dir;
-
-    // This is a map of names => FileInfos for quick searching of children.
-    std::map<QString, QSharedPointer<FileInfo> > children;
-};
-
-KentUniversity::KentUniversity(Context *context)
-    : GoogleDrive(context), context_(context), root_(NULL) {
-    if (context) {
-        printd("KentUniversity::KentUniversity\n");
-        nam_ = new QNetworkAccessManager(this);
-        connect(nam_, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-    root_ = NULL;
+KentUniversity::KentUniversity(Context *context) : GoogleDrive(context)
+{
+	printd("KentUniversity::KentUniversity\n");
 
     uploadCompression = none; // gzip
     downloadCompression = none;
@@ -124,16 +105,6 @@ KentUniversity::KentUniversity(Context *context)
     settings.insert(Local1, GC_UOK_GOOGLE_DRIVE_FOLDER_ID); // derived during config, no user action
     settings.insert(Local2, GC_UOK_GOOGLE_DRIVE_REFRESH_TOKEN); // derived during config, no user action
     settings.insert(Local3, GC_UOK_GOOGLE_DRIVE_LAST_ACCESS_TOKEN_REFRESH); // derived during config, no user action
-}
-
-KentUniversity::~KentUniversity() {
-    if (context) delete nam_;
-}
-
-void KentUniversity::onSslErrors(QNetworkReply*reply, const QList<QSslError> & )
-{
-    reply->ignoreSslErrors();
-
 }
 
 // open by connecting and getting a basic list of folders available

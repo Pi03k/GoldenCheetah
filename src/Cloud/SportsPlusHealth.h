@@ -37,7 +37,6 @@ class SportsPlusHealth : public CloudService {
 
         SportsPlusHealth(Context *context);
         CloudService *clone(Context *context) { return new SportsPlusHealth(context); }
-        ~SportsPlusHealth();
 
         // upload only and authenticates with a user and password
         int capabilities() const { return UserPass | Upload; }
@@ -55,14 +54,8 @@ class SportsPlusHealth : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

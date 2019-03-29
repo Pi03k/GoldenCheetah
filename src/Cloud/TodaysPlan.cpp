@@ -51,13 +51,8 @@
     } while(0)
 #endif
 
-TodaysPlan::TodaysPlan(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+TodaysPlan::TodaysPlan(Context *context) : CloudService(context)
+{
     uploadCompression = gzip; // gzip
     downloadCompression = none;
     useMetric = true; // distance and duration metadata
@@ -69,16 +64,6 @@ TodaysPlan::TodaysPlan(Context *context) : CloudService(context), context(contex
     settings.insert(Key, GC_TODAYSPLAN_USERKEY);
     settings.insert(AthleteID, GC_TODAYSPLAN_ATHLETE_ID);
     settings.insert(Local1, GC_TODAYSPLAN_ATHLETE_NAME);
-}
-
-TodaysPlan::~TodaysPlan() {
-    if (context) delete nam;
-}
-
-void
-TodaysPlan::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 // open by connecting and getting a basic list of folders available
@@ -104,7 +89,7 @@ TodaysPlan::open(QStringList &errors)
     QNetworkRequest request(url);
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -251,10 +236,10 @@ TodaysPlan::readdir(QString path, QStringList &errors, QDateTime from, QDateTime
 
             request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
             request.setRawHeader("Content-Length", jsonStringDataSize);
-            reply = nam->post(request, jsonString);
+            reply = nam_->post(request, jsonString);
         } else {
             // get further pages of the Search
-            reply = nam->get(request);
+            reply = nam_->get(request);
         }
 
         // blocking request
@@ -357,7 +342,7 @@ TodaysPlan::readFile(QByteArray *data, QString remotename, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -436,7 +421,7 @@ TodaysPlan::writeFile(QByteArray &data, QString remotename, RideFile *ride)
     // post the file
     QNetworkReply *reply;
 
-    reply = nam->post(request, multiPart);
+    reply = nam_->post(request, multiPart);
 
     // catch finished signal
     connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
@@ -515,7 +500,7 @@ TodaysPlan::listAthletes()
     QNetworkRequest request(url);
     QString token = getSetting(GC_TODAYSPLAN_TOKEN, "").toString();
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -591,7 +576,7 @@ TodaysPlan::prepareResponse(QByteArray* data, QString &name)
         // convert
         JsonFileReader reader;
         data->clear();
-        data->append(reader.toByteArray(context, ride, true, true, true, true));
+        data->append(reader.toByteArray(context_, ride, true, true, true, true));
 
         // rename
         if (QFileInfo(name).suffix() != "json") name = QFileInfo(name).baseName() + ".json";

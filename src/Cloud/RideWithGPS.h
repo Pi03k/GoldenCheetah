@@ -38,7 +38,6 @@ class RideWithGPS : public CloudService {
 
         RideWithGPS(Context *context);
         CloudService *clone(Context *context) { return new RideWithGPS(context); }
-        ~RideWithGPS();
 
         // upload only and authenticates with a user and password
         int capabilities() const { return UserPass | Upload; }
@@ -56,14 +55,8 @@ class RideWithGPS : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

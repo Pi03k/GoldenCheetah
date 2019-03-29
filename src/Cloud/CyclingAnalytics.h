@@ -37,7 +37,6 @@ class CyclingAnalytics : public CloudService {
 
         CyclingAnalytics(Context *context);
         CloudService *clone(Context *context) { return new CyclingAnalytics(context); }
-        ~CyclingAnalytics();
 
         // upload only and authenticates with OAuth tokens
         int capabilities() const { return OAuth | Upload | Download | Query; }
@@ -66,14 +65,8 @@ class CyclingAnalytics : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

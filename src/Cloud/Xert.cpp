@@ -51,13 +51,8 @@
     } while(0)
 #endif
 
-Xert::Xert(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+Xert::Xert(Context *context) : CloudService(context)
+{
     uploadCompression = none;
     downloadCompression = none;
     filetype = FIT;
@@ -70,16 +65,6 @@ Xert::Xert(Context *context) : CloudService(context), context(context), root_(NU
     settings.insert(Local1, GC_XERT_REFRESH_TOKEN);
     settings.insert(Local2, GC_XERT_LAST_REFRESH);
 
-}
-
-Xert::~Xert() {
-    if (context) delete nam;
-}
-
-void
-Xert::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -109,7 +94,7 @@ Xert::open(QStringList &errors)
     data += "&grant_type=refresh_token";
 
     // make request
-    QNetworkReply* reply = nam->post(request, data.toLatin1());
+    QNetworkReply* reply = nam_->post(request, data.toLatin1());
 
     // blocking request
     QEventLoop loop;
@@ -149,7 +134,7 @@ Xert::open(QStringList &errors)
     setSetting(GC_XERT_LAST_REFRESH, QDateTime::currentDateTime());
 
     // get the factory to save our settings permanently
-    CloudServiceFactory::instance().saveSettings(this, context);
+    CloudServiceFactory::instance().saveSettings(this, context_);
     return true;
 }
 
@@ -194,7 +179,7 @@ Xert::readdir(QString path, QStringList &errors, QDateTime from, QDateTime to)
 
     // make request
     printd("fetch : %s\n", urlstr.toStdString().c_str());
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -303,7 +288,7 @@ Xert::readActivityDetail(QString path, bool withSessionData)
 
     // make request
     printd("fetch : %s\n", urlstr.toStdString().c_str());
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -355,7 +340,7 @@ Xert::readFile(QByteArray *data, QString remotename, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -464,7 +449,7 @@ Xert::readFileCompleted()
         // create a response
         JsonFileReader reader;
         returning->clear();
-        returning->append(reader.toByteArray(context, ret, true, true, true, true));
+        returning->append(reader.toByteArray(context_, ret, true, true, true, true));
 
         // temp ride not needed anymore
         delete ret;
@@ -517,7 +502,7 @@ Xert::writeFile(QByteArray &data, QString remotename, RideFile *ride)
     // post the file
     QNetworkReply *reply;
 
-    reply = nam->post(request, multiPart);
+    reply = nam_->post(request, multiPart);
 
     // catch finished signal
     connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));

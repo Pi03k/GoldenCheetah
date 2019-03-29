@@ -51,8 +51,18 @@ CloudServiceFactory *CloudServiceFactory::instance_;
 // nothing doing in base class, for now
 CloudService::CloudService(Context *context) :
     uploadCompression(zip), downloadCompression(zip),
-    filetype(JSON), useMetric(false), useEndDate(false), context(context)
+    filetype(JSON), useMetric(false), useEndDate(false), context_(context)
 {
+    if (context_)
+    {
+        nam_ = std::unique_ptr<QNetworkAccessManager>(new QNetworkAccessManager(this));
+        connect(nam_.get(), SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
+    }
+}
+
+void CloudService::onSslErrors(QNetworkReply*reply, const QList<QSslError> & )
+{
+    reply->ignoreSslErrors();
 }
 
 // clean up on delete
@@ -269,7 +279,7 @@ CloudService::uncompressRide(QByteArray *data, QString name, QStringList &errors
     }
 
     // uncompress and write to tmp preserviing the file extension
-    QString tmp = context->athlete->home->temp().absolutePath() + "/" + QFileInfo(name).baseName() + "." + QFileInfo(name).suffix();
+    QString tmp = context_->athlete->home->temp().absolutePath() + "/" + QFileInfo(name).baseName() + "." + QFileInfo(name).suffix();
 
     // uncompress and write a file
     QFile file(tmp);
@@ -278,7 +288,7 @@ CloudService::uncompressRide(QByteArray *data, QString name, QStringList &errors
     file.close();
 
     // read the file in using the correct ridefile reader
-    RideFile *ride = RideFileFactory::instance().openRideFile(context, file, errors);
+    RideFile *ride = RideFileFactory::instance().openRideFile(context_, file, errors);
 
     // remove temp
     file.remove();

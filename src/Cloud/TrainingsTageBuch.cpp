@@ -52,13 +52,8 @@
 
 const QString TTB_URL( "http://trainingstagebuch.org" );
 
-TrainingsTageBuch::TrainingsTageBuch(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+TrainingsTageBuch::TrainingsTageBuch(Context *context) : CloudService(context)
+{
     uploadCompression = none; // gzip
     filetype = CloudService::uploadType::PWX;
     useMetric = true; // distance and duration metadata
@@ -66,16 +61,6 @@ TrainingsTageBuch::TrainingsTageBuch(Context *context) : CloudService(context), 
     //config
     settings.insert(Username, GC_TTBUSER);
     settings.insert(Password, GC_TTBPASS);
-}
-
-TrainingsTageBuch::~TrainingsTageBuch() {
-    if (context) delete nam;
-}
-
-void
-TrainingsTageBuch::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -111,12 +96,12 @@ TrainingsTageBuch::open(QStringList &errors)
 
     // block waiting for response...
     QEventLoop loop;
-    reply = nam->get(request);
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    reply_ = nam_->get(request);
+    connect(reply_, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
     TTBSettingsParser handler;
-    QXmlInputSource source(reply);
+    QXmlInputSource source(reply_);
 
     QXmlSimpleReader reader;
     reader.setContentHandler(&handler);
@@ -161,12 +146,12 @@ TrainingsTageBuch::open(QStringList &errors)
     request.setRawHeader( "Accept-Charset", "utf-8" );
 
     // block waiting for response
-    reply = nam->get(request);
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    reply_ = nam_->get(request);
+    connect(reply_, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
     TTBSessionParser shandler;
-    QXmlInputSource ssource(reply);
+    QXmlInputSource ssource(reply_);
 
     reader.setContentHandler(&shandler);
 
@@ -250,7 +235,7 @@ TrainingsTageBuch::writeFile(QByteArray &data, QString remotename, RideFile *rid
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, body);
+    reply = nam_->post(request, body);
 
     // catch finished signal
     connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));

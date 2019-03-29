@@ -41,12 +41,5 @@ class Withings : public CloudService {
         // this is a stub only used to setup configuration !
         int type() const { return Measures; }
         int capabilities() const { return OAuth | Download; }
-
-    public slots:
-
-    private:
-        Context *context;
-
-    private slots:
 };
 #endif

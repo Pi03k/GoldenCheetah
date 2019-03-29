@@ -49,7 +49,6 @@ class TrainingsTageBuch : public CloudService {
 
         TrainingsTageBuch(Context *context);
         CloudService *clone(Context *context) { return new TrainingsTageBuch(context); }
-        ~TrainingsTageBuch();
 
         // upload only and authenticates with a user and password
         int capabilities() const { return UserPass | Upload; }
@@ -67,18 +66,12 @@ class TrainingsTageBuch : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QString sessionId;
         bool proMember;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 
 class TTBParser : public QXmlDefaultHandler

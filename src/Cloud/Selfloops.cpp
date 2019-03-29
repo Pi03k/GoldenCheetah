@@ -49,13 +49,8 @@
     } while(0)
 #endif
 
-Selfloops::Selfloops(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+Selfloops::Selfloops(Context *context) : CloudService(context)
+{
     uploadCompression = gzip; // gzip
     filetype = CloudService::uploadType::TCX;
     useMetric = true; // distance and duration metadata
@@ -63,16 +58,6 @@ Selfloops::Selfloops(Context *context) : CloudService(context), context(context)
     //config
     settings.insert(Username, GC_SELUSER);
     settings.insert(Password, GC_SELPASS);
-}
-
-Selfloops::~Selfloops() {
-    if (context) delete nam;
-}
-
-void
-Selfloops::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -134,13 +119,13 @@ Selfloops::writeFile(QByteArray &data, QString remotename, RideFile *ride)
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, multiPart);
+    reply_ = nam_->post(request, multiPart);
 
     // catch finished signal
-    connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
+    connect(reply_, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
 
     // remember
-    mapReply(reply,remotename);
+    mapReply(reply_,remotename);
     return true;
 }
 

@@ -32,7 +32,6 @@ class TodaysPlan : public CloudService {
 
         TodaysPlan(Context *context);
         CloudService *clone(Context *context) { return new TodaysPlan(context); }
-        ~TodaysPlan();
 
         QString id() const { return "Today's Plan"; }
         QString uiName() const { return tr("Today's Plan"); }
@@ -62,8 +61,6 @@ class TodaysPlan : public CloudService {
         QList<CloudServiceAthlete> listAthletes();
         bool selectAthlete(CloudServiceAthlete);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors, QDateTime from, QDateTime to);
 
     public slots:
@@ -76,18 +73,10 @@ class TodaysPlan : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
-        CloudServiceEntry *root_;
-
         QMap<QNetworkReply*, QByteArray*> buffers;
 
         QString userId;
 
         QMap<QString, QJsonObject> replyActivity;
-
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

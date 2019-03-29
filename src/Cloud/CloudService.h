@@ -19,6 +19,7 @@
 #ifndef GC_CloudService_h
 #define GC_CloudService_h
 
+#include <memory>
 #include <QList>
 #include <QMap>
 #include <QString>
@@ -164,7 +165,7 @@ class CloudService : public QObject {
         // we use a dirent style API for traversing
         // root - get me the root of the store
         // readdir - get me the contents of a path
-        virtual CloudServiceEntry *root() { return NULL; }
+        virtual CloudServiceEntry *root() { return root_; }
         virtual QList<CloudServiceEntry*> readdir(QString path, QStringList &errors) {
             Q_UNUSED(path); errors << "not implemented."; return QList<CloudServiceEntry*>();
         }
@@ -215,8 +216,13 @@ class CloudService : public QObject {
         QMap<QNetworkReply*,QString> replymap_;
         QList<CloudServiceEntry*> list_;
 
-        Context *context;
-        
+        Context *context_;
+        std::unique_ptr<QNetworkAccessManager> nam_;
+        QNetworkReply *reply_;
+        CloudServiceEntry *root_ = nullptr;
+
+    private slots:
+        void onSslErrors(QNetworkReply*, const QList<QSslError> &);
 };
 
 // UPLOADER dialog to upload a single rideitem to the file
@@ -319,7 +325,7 @@ class CloudServiceSyncDialog : public QDialog
 
     public:
         CloudServiceSyncDialog(Context *context, CloudService *store);
-	
+
     public slots:
 
         void cancelClicked();

@@ -41,7 +41,6 @@ class PolarFlow : public CloudService {
 
         PolarFlow(Context *context);
         CloudService *clone(Context *context) { return new PolarFlow(context); }
-        ~PolarFlow();
 
         QString id() const { return "PolarFlow"; }
         QString uiName() const { return tr("PolarFlow"); }
@@ -58,8 +57,6 @@ class PolarFlow : public CloudService {
         // read a file
         bool readFile(QByteArray *data, QString remotename, QString remoteid);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors, QDateTime from, QDateTime to);
 
     public slots:
@@ -69,16 +66,10 @@ class PolarFlow : public CloudService {
         void readFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
 
         QString userId;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

@@ -66,28 +66,11 @@ namespace {
     static const QString kMaxResults = "1000";
 };
 
-struct GoogleDrive::FileInfo {
-    QString name;
-    QString id;  // This is the unique identifier.
-    QString parent; // id of the parent.
-    QString download_url;
-
-    QDateTime modified;
-    int size;
-    bool is_dir;
-
-    // This is a map of names => FileInfos for quick searching of children.
-    std::map<QString, QSharedPointer<FileInfo> > children;
-};
-
-GoogleDrive::GoogleDrive(Context *context)
-    : CloudService(context), context_(context), root_(NULL) {
-    if (context) {
+GoogleDrive::GoogleDrive(Context *context) : CloudService(context)
+{
+	{
         printd("GoogleDrive::GoogleDrive\n");
-        nam_ = new QNetworkAccessManager(this);
-        connect(nam_, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
     }
-    root_ = NULL;
 
     // config
     settings.insert(Combo1, QString("%1::Scope::drive::drive.appdata::drive.file").arg(GC_GOOGLE_DRIVE_AUTH_SCOPE));
@@ -96,16 +79,6 @@ GoogleDrive::GoogleDrive(Context *context)
     settings.insert(Local1, GC_GOOGLE_DRIVE_FOLDER_ID); // derived during config, no user action
     settings.insert(Local2, GC_GOOGLE_DRIVE_REFRESH_TOKEN); // derived during config, no user action
     settings.insert(Local3, GC_GOOGLE_DRIVE_LAST_ACCESS_TOKEN_REFRESH); // derived during config, no user action
-}
-
-GoogleDrive::~GoogleDrive() {
-    if (context) delete nam_;
-}
-
-void GoogleDrive::onSslErrors(QNetworkReply*reply, const QList<QSslError> & )
-{
-    reply->ignoreSslErrors();
-
 }
 
 // open by connecting and getting a basic list of folders available

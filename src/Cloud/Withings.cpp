@@ -21,7 +21,7 @@
 #include "Settings.h"
 
 // Stub only, for configuration
-Withings::Withings(Context *context) : CloudService(context), context(context) {
+Withings::Withings(Context *context) : CloudService(context) {
 
     // config
     settings.insert(OAuthToken, GC_NOKIA_TOKEN);

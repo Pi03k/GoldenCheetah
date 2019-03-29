@@ -32,7 +32,6 @@ class SixCycle : public CloudService {
 
         SixCycle(Context *context);
         CloudService *clone(Context *context) { return new SixCycle(context); }
-        ~SixCycle();
 
         QString id() const { return "Sixcycle"; }
         QString uiName() const { return tr("Sixcycle"); }
@@ -55,8 +54,6 @@ class SixCycle : public CloudService {
         // create a folder
         bool createFolder(QString);
 
-        // dirent style api
-        CloudServiceEntry *root() { return root_; }
         QList<CloudServiceEntry*> readdir(QString path, QStringList &errors, QDateTime from, QDateTime to);
 
     public slots:
@@ -69,18 +66,12 @@ class SixCycle : public CloudService {
         void writeFileCompleted();
 
     private:
-        Context *context;
-        QNetworkAccessManager *nam;
         QNetworkReply *reply;
-        CloudServiceEntry *root_;
 
         QMap<QNetworkReply*, QByteArray*> buffers;
 
         // once authenticated we get a token to access and a session user id (as a URL)
         QString session_token;
         QString session_user;
-
-    private slots:
-        void onSslErrors(QNetworkReply *reply, const QList<QSslError>&error);
 };
 #endif

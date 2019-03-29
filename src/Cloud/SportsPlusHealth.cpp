@@ -54,13 +54,8 @@
 // api endpoint
 const QString SPH_URL("http://www.sportplushealth.com/sport/en/api/1");
 
-SportsPlusHealth::SportsPlusHealth(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+SportsPlusHealth::SportsPlusHealth(Context *context) : CloudService(context)
+{
     uploadCompression = none; // gzip
     filetype = CloudService::uploadType::TCX;
     useMetric = true; // distance and duration metadata
@@ -68,16 +63,6 @@ SportsPlusHealth::SportsPlusHealth(Context *context) : CloudService(context), co
     //config
     settings.insert(Username, GC_SPORTPLUSHEALTHUSER);
     settings.insert(Password, GC_SPORTPLUSHEALTHPASS);
-}
-
-SportsPlusHealth::~SportsPlusHealth() {
-    if (context) delete nam;
-}
-
-void
-SportsPlusHealth::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -137,13 +122,13 @@ SportsPlusHealth::writeFile(QByteArray &data, QString remotename, RideFile *ride
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, body);
+    reply_ = nam_->post(request, body);
 
     // catch finished signal
-    connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
+    connect(reply_, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
 
     // remember
-    mapReply(reply,remotename);
+    mapReply(reply_,remotename);
     return true;
 }
 

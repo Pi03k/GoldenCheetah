@@ -51,13 +51,8 @@
     } while(0)
 #endif
 
-Strava::Strava(Context *context) : CloudService(context), context(context), root_(NULL) {
-
-    if (context) {
-        nam = new QNetworkAccessManager(this);
-        connect(nam, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )), this, SLOT(onSslErrors(QNetworkReply*, const QList<QSslError> & )));
-    }
-
+Strava::Strava(Context *context) : CloudService(context)
+{
     uploadCompression = gzip; // gzip
     downloadCompression = none;
     filetype = uploadType::TCX;
@@ -68,19 +63,9 @@ Strava::Strava(Context *context) : CloudService(context), context(context), root
     settings.insert(Metadata1, QString("%1::Activity Name").arg(GC_STRAVA_ACTIVITY_NAME));
 }
 
-Strava::~Strava() {
-    if (context) delete nam;
-}
-
 QImage Strava::logo() const
 {
     return QImage(":images/services/strava.png");
-}
-
-void
-Strava::onSslErrors(QNetworkReply *reply, const QList<QSslError>&)
-{
-    reply->ignoreSslErrors();
 }
 
 bool
@@ -144,7 +129,7 @@ Strava::readdir(QString path, QStringList &errors, QDateTime from, QDateTime to)
         QNetworkRequest request(url);
         request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
-        QNetworkReply *reply = nam->get(request);
+        QNetworkReply *reply = nam_->get(request);
 
         // blocking request
         QEventLoop loop;
@@ -225,7 +210,7 @@ Strava::readFile(QByteArray *data, QString remotename, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // remember
     mapReply(reply,remotename);
@@ -330,13 +315,13 @@ Strava::writeFile(QByteArray &data, QString remotename, RideFile *ride)
 
     // this must be performed asyncronously and call made
     // to notifyWriteCompleted(QString remotename, QString message) when done
-    reply = nam->post(request, multiPart);
+    reply_ = nam_->post(request, multiPart);
 
     // catch finished signal
-    connect(reply, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
+    connect(reply_, SIGNAL(finished()), this, SLOT(writeFileCompleted()));
 
     // remember
-    mapReply(reply,remotename);
+    mapReply(reply_,remotename);
     return true;
 }
 
@@ -446,7 +431,7 @@ Strava::addSamples(RideFile* ret, QString remoteid)
     request.setRawHeader("Authorization", (QString("Bearer %1").arg(token)).toLatin1());
 
     // put the file
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = nam_->get(request);
 
     // blocking request
     QEventLoop loop;
@@ -852,7 +837,7 @@ Strava::prepareResponse(QByteArray* data)
 
         JsonFileReader reader;
         data->clear();
-        data->append(reader.toByteArray(context, ride, true, true, true, true));
+        data->append(reader.toByteArray(context_, ride, true, true, true, true));
 
         // temp ride not needed anymore
         delete ride;
