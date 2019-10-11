@@ -5,8 +5,10 @@
 #APP_NAME = 
 
 # We recommend a debug build for development and a release build for deployment
-#CONFIG += debug
+CONFIG += debug
 #CONFIG += release
+
+DEFINES += GC_WANT_ALLDEBUG
 
 # Uncomment when WebKit is not available (e.g. QT >= 5.6)
 #DEFINES += NOWEBKIT
@@ -15,7 +17,7 @@
 # You will need R installed along with the Rcpp and RInside
 # packages. There is an R script in the `util' directory that
 # can be run to install these packages; see it for more info.
-#DEFINES += GC_WANT_R
+DEFINES += GC_WANT_R
 
 # Uncomment below if you want Python charting / ML etc
 # You will need Python Development tools installed
@@ -25,8 +27,8 @@
 #
 # below 3 lines work well on Linux style OS
 #DEFINES += GC_WANT_PYTHON
-#PYTHONINCLUDES = -I/usr/include/python3.6
-#PYTHONLIBS = -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu -lpython3.6m
+#PYTHONINCLUDES = -I/usr/include/python3.7m
+#PYTHONLIBS = -L/usr/lib/python3.7/config-3.7m-x86_64-linux-gnu -lpython3.7m
 # below 3 lines work well on Windows
 #DEFINES += GC_WANT_PYTHON
 #PYTHONINCLUDES = -I\"C:\Program Files\Python36\include\"
@@ -63,12 +65,12 @@
 
 # We use g++ on all platforms so switch on auto vectorization amongst other
 # things to speed up looping over ride file points
-#QMAKE_CXXFLAGS += -O3
+QMAKE_CXXFLAGS += -O3 -g0
 
 # Let us know where flex and bison are installed.
 # You may need to specify the full path if things don't work.
-#QMAKE_LEX  = flex
-#QMAKE_YACC = bison
+QMAKE_LEX  = flex
+QMAKE_YACC = bison
 # If you're compiling with nmake and VC then you
 # will likely also use win_flex and win_bison
 # so uncomment below
@@ -90,9 +92,11 @@
 # SRMIO_LIBS    = $${SRMIO_INSTALL}/lib/libsrmio.a
 # You may override the INCLUDE and LIB files if you like.
 # You *must* define SRMIO_INSTALL to use this feature.
-#SRMIO_INSTALL = 
-#SRMIO_INCLUDE = 
-#SRMIO_LIBS    = 
+exists(/usr/lib/libsrmio.a) {
+    SRMIO_INSTALL = yes
+    SRMIO_INCLUDE = /usr/include/
+    SRMIO_LIBS    = /usr/lib/libsrmio.a
+}
 
 # If you want D2XX device downloads, you need the D2XX libraries
 #    http://www.ftdichip.com/Drivers/D2XX.htm
@@ -113,9 +117,11 @@
 #
 # then set the following variable appropriately
 # to the root of the libs/include path
-#KML_INSTALL = /usr/local
-#KML_INCLUDE = 
-#KML_LIBS    = 
+exists(/usr/lib/libkmldom.so) {
+    KML_INSTALL = yes
+    KML_INCLUDE = /usr/include/
+    KML_LIBS    = /usr/lib/libkmldom.so /usr/lib/libkmlbase.so
+}
 # Since KML also requires BOOST you will need to install
 # that too and then set BOOST_INCLUDE to that location
 # If the files are in /usr/include/boost then set
@@ -135,9 +141,11 @@
 # ICAL_LIBS    = $${ICAL_INSTALL}/lib/libical.a
 # You may override the INCLUDE and LIB files if you like.
 # You *must* define ICAL_INSTALL to use this feature.
-#ICAL_INSTALL = 
-#ICAL_INCLUDE = 
-#ICAL_LIBS    =
+packagesExist(libical) {
+    ICAL_INSTALL = yes
+    ICAL_INCLUDE = /usr/include/
+    ICAL_LIBS    = -lical -licalss -licalvcal -lpthread
+}
 
 # If you want support for using USB1 sticks in Train View on Windows
 # then install the SiLabs USBXpress Software Development Kit (SDK)
@@ -182,9 +190,11 @@
 # VLC_LIBS    = -lvlc
 # You may override the INCLUDE and LIB files if you like.
 # You *must* define VLC_INSTALL to use this feature.
-#VLC_INSTALL = 
-#VLC_INCLUDE = 
-#VLC_LIBS    = 
+packagesExist(libvlc) {
+    VLC_INSTALL = yes
+    VLC_INCLUDE = /usr/include/
+    VLC_LIBS    = -lvlc -lvlccore
+}
 
 # *** Mac users NOTE ***
 # On MAC you don't need libvlc since we use the
@@ -201,9 +211,14 @@
 # some modifications in the build process to build with MSVC2015 
 # Code is available at: http://www.mega-nerd.com/SRC/
 #
-#SAMPLERATE_INSTALL = /usr/local
-#SAMPLERATE_INCLUDE = /usr/local/include
-#SAMPLERATE_LIBS = /usr/local/lib/libsamplerate.a
+packagesExist(samplerate) {
+    SAMPLERATE_INSTALL = yes
+    SAMPLERATE_INCLUDE = /usr/include
+    SAMPLERATE_LIBS = -lsamplerate
+    DEFINES += GC_VIDEO_VLC   
+} else {
+    DEFINES += GC_VIDEO_NONE 
+}
 
 # If your system has PKG_CONFIG, QT can use this to get dependent libraries.
 # Add the names of libraries with PKG_CONFIG information.
@@ -216,8 +231,8 @@
 # then you should comment the line below, otherwise you
 # will need to have the compress libraries installed
 # separately. 
-#LIBZ_INCLUDE =
-#LIBZ_LIBS    = -lz
+LIBZ_INCLUDE =
+LIBZ_LIBS    = -lz
 
 macx {
     # Uncomment this line to build with OS X Tiger support on a Leopard system:
@@ -250,8 +265,11 @@ macx {
 # https://goldencheetah.github.io/blank.html and full permissions 
 # are granted. Then set the client # and secret in the two defines
 # below replacing the xxxxxxxxxxxxxx with the actual values.
-#DEFINES += GC_DROPBOX_CLIENT_ID=\\\"xxxxxxxxxxxxxxx\\\"
-#DEFINES += GC_DROPBOX_CLIENT_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
+DEFINES += GC_DROPBOX_CLIENT_ID=\\\"9jrhrk7vxnq3o34\\\"
+DEFINES += GC_DROPBOX_CLIENT_SECRET=\\\"ez5nwdyp39fjqwb\\\"
+
+#DEFINES += GC_STRAVA_CLIENT_ID=\\\"26919\\\"
+#DEFINES += GC_STRAVA_CLIENT_SECRET=\\\"fb3a3646c13a654c15ff01323c4fa8ca0358fcae\\\"
 
 # if you have your own MAPQUEST KEY
 #DEFINES += GC_MAPQUESTAPI_KEY=\\\"xxxxxxxxxxxxxxxxxxxxxx\\\"

@@ -18,6 +18,7 @@
 
 #ifndef ROUTEWINDOW_H
 #define ROUTEWINDOW_H 1
+#ifndef NOWEBKIT
 #include "GoldenCheetah.h"
 #include "Context.h"
 #include "IntervalItem.h"
@@ -121,4 +122,5 @@ class RouteWindow : public GcChartWindow
 
 };
 
+#endif // !NOWEBKIT
 #endif // ROUTEWINDOW_H

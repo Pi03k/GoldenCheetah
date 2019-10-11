@@ -1,3 +1,4 @@
+#include <QString>
 #include <QIcon>
 #include <QMenu>
 #include <QPainter>

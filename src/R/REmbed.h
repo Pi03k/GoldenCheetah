@@ -21,9 +21,9 @@
 
 // R and its data structures
 #define R_NO_REMAP // don't map length(x) -> Rf_length for older code base
-#include <R.h>
-#include <Rinternals.h>
-#include "Rversion.h"
+#include <R/R.h>
+#include <R/Rinternals.h>
+#include <R/Rversion.h>
 
 // message i/o from to R
 #ifndef WIN32
@@ -32,15 +32,15 @@
 #endif
 
 // specific to embedding
-#include <Rembedded.h>
-#include <R_ext/Parse.h>
-#include <R_ext/Rdynload.h>
-#include <R_ext/RStartup.h>
-#include <R_ext/Error.h>
+#include <R/Rembedded.h>
+#include <R/R_ext/Parse.h>
+#include <R/R_ext/Rdynload.h>
+#include <R/R_ext/RStartup.h>
+#include <R/R_ext/Error.h>
 
-#include <R_ext/Boolean.h>
-#include "R_ext/GraphicsEngine.h"
-#include "R_ext/GraphicsDevice.h"
+#include <R/R_ext/Boolean.h>
+#include <R/R_ext/GraphicsEngine.h>
+#include <R/R_ext/GraphicsDevice.h>
 
 // remap
 #include "RLibrary.h"

@@ -18,6 +18,7 @@
 
 #ifndef _GC_RouteItem_h
 #define _GC_RouteItem_h 1
+#ifndef NOWEBKIT
 #include "GoldenCheetah.h"
 
 #include "Route.h"
@@ -92,4 +93,5 @@ class RouteItem : public QObject, public QTreeWidgetItem //<< for signals/slots
         void freeMemory();
 
 };
+#endif // NOWEBKIT
 #endif // _GC_RouteItem_h

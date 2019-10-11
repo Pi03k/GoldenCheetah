@@ -18,6 +18,7 @@
 
 #ifndef RIDEWINDOW_H
 #define RIDEWINDOW_H
+#ifndef NOWEBKIT
 
 #include <QWidget>
 #include <QWebView>
@@ -382,4 +383,5 @@ public:
 
 };
 
+#endif // NOWEBKIT
 #endif // RIDEWINDOW_H

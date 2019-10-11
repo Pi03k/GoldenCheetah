@@ -19,6 +19,7 @@
 #include <QString>
 #include <QList>
 #include <QVector>
+#include <QMap>
 
 #ifndef GC_PowerProfile
 #define GC_PowerProfile 1
